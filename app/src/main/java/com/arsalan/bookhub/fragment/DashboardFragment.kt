@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.textclassifier.TextLinks
 import android.widget.Button
+import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -115,18 +116,7 @@ class DashboardFragment : Fragment() {
         //activity- cos doing it in fragment not activity
         layoutManager=LinearLayoutManager(activity)
 
-        recyclerAdapter= DashboardRecyclerAdapter(activity as Context,bookInfoList)
 
-
-        recyclerDashboard.adapter=recyclerAdapter
-
-        recyclerDashboard.layoutManager=layoutManager
-
-        recyclerDashboard.addItemDecoration(
-            DividerItemDecoration(
-                recyclerDashboard.context,
-                (layoutManager as LinearLayoutManager).orientation)
-        )
 
 
         val queue = Volley.newRequestQueue(activity as Context)
@@ -150,7 +140,21 @@ class DashboardFragment : Fragment() {
                         bookJsonObject.getString("image")
                     )
                     bookInfoList.add(bookObject)
+                    recyclerAdapter= DashboardRecyclerAdapter(activity as Context,bookInfoList)
+
+
+                    recyclerDashboard.adapter=recyclerAdapter
+
+                    recyclerDashboard.layoutManager=layoutManager
+
+                    recyclerDashboard.addItemDecoration(
+                        DividerItemDecoration(
+                            recyclerDashboard.context,
+                            (layoutManager as LinearLayoutManager).orientation)
+                    )
                 }
+            }else{
+                Toast.makeText(activity as Context, "Some Error Occurred!!!", Toast.LENGTH_SHORT).show()
             }
 
         },Response.ErrorListener {
