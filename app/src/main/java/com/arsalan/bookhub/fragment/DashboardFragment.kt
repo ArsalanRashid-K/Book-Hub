@@ -13,6 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.textclassifier.TextLinks
 import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -26,6 +28,7 @@ import com.arsalan.bookhub.R
 import com.arsalan.bookhub.adapter.DashboardRecyclerAdapter
 import com.arsalan.bookhub.model.Book
 import com.arsalan.bookhub.util.ConnectionManager
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
@@ -37,6 +40,9 @@ class DashboardFragment : Fragment() {
     lateinit var layoutManager: RecyclerView.LayoutManager
 
     lateinit var btnCheckInternet:Button
+
+    lateinit var progressLayout: RelativeLayout
+    lateinit var progressBar: ProgressBar
 
     val  bookInfoList = arrayListOf<Book>()
 
@@ -85,6 +91,11 @@ class DashboardFragment : Fragment() {
         recyclerDashboard=view.findViewById(R.id.recyclerDashboard)
 
         btnCheckInternet=view.findViewById(R.id.btnCheckInternet)
+        progressLayout=view.findViewById(R.id.progressLayout)
+        progressBar=view.findViewById(R.id.progressBar)
+
+        progressLayout.visibility= View.VISIBLE
+
         btnCheckInternet.setOnClickListener {
             if (ConnectionManager().checkConnectivity(activity as Context)) {
                 // Internet is available
@@ -133,47 +144,57 @@ class DashboardFragment : Fragment() {
                 object : JsonObjectRequest(Request.Method.GET, url, null, Response.Listener {
 
                     // here we will handle the response
-                    val success = it.getBoolean("success")
-                    if (success) {
-                        val data = it.getJSONArray("data")
-                        for (i in 0 until data.length()) {
-                            val bookJsonObject = data.getJSONObject(i)
-                            val bookObject = Book(
-                                bookJsonObject.getString("book_id"),
-                                bookJsonObject.getString("name"),
-                                bookJsonObject.getString("author"),
-                                bookJsonObject.getString("rating"),
-                                bookJsonObject.getString("price"),
-                                bookJsonObject.getString("image")
-                            )
-                            bookInfoList.add(bookObject)
-                            recyclerAdapter =
-                                DashboardRecyclerAdapter(activity as Context, bookInfoList)
+                    try {
+                        progressLayout.visibility=View.GONE
+                        val success = it.getBoolean("success")
 
-
-                            recyclerDashboard.adapter = recyclerAdapter
-
-                            recyclerDashboard.layoutManager = layoutManager
-
-                            recyclerDashboard.addItemDecoration(
-                                DividerItemDecoration(
-                                    recyclerDashboard.context,
-                                    (layoutManager as LinearLayoutManager).orientation
+                        if (success) {
+                            val data = it.getJSONArray("data")
+                            for (i in 0 until data.length()) {
+                                val bookJsonObject = data.getJSONObject(i)
+                                val bookObject = Book(
+                                    bookJsonObject.getString("book_id"),
+                                    bookJsonObject.getString("name"),
+                                    bookJsonObject.getString("author"),
+                                    bookJsonObject.getString("rating"),
+                                    bookJsonObject.getString("price"),
+                                    bookJsonObject.getString("image")
                                 )
-                            )
+                                bookInfoList.add(bookObject)
+                                recyclerAdapter =
+                                    DashboardRecyclerAdapter(activity as Context, bookInfoList)
+
+
+                                recyclerDashboard.adapter = recyclerAdapter
+
+                                recyclerDashboard.layoutManager = layoutManager
+
+                                recyclerDashboard.addItemDecoration(
+                                    DividerItemDecoration(
+                                        recyclerDashboard.context,
+                                        (layoutManager as LinearLayoutManager).orientation
+                                    )
+                                )
+                            }
+                        } else {
+                            Toast.makeText(
+                                activity as Context,
+                                "Some Error Occurred!!!",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                    } else {
-                        Toast.makeText(
-                            activity as Context,
-                            "Some Error Occurred!!!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    }catch (e:JSONException){
+                        Toast.makeText(activity as Context , "some unexpected error occured!!!",Toast.LENGTH_SHORT).show()
                     }
+
+
+
 
                 }, Response.ErrorListener {
 
                     // here we will handle the errors
-                    println("Error is $it")
+                    Toast.makeText(activity as Context, " volley error occurred", Toast.LENGTH_SHORT).show()
+
 
 
                 }) {
