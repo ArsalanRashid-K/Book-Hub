@@ -1,9 +1,12 @@
 package com.arsalan.bookhub.fragment
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +14,7 @@ import android.view.ViewGroup
 import android.view.textclassifier.TextLinks
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -123,56 +127,81 @@ class DashboardFragment : Fragment() {
 
          val url = "http://13.235.250.119/v1/book/fetch_books/"
 
-        val jsonObjectRequest=object : JsonObjectRequest(Request.Method.GET,url, null,Response.Listener {
+        if(ConnectionManager().checkConnectivity(activity as Context)) {
 
-            // here we will handle the response
-                val success= it.getBoolean("success")
-            if (success){
-                val data = it.getJSONArray("data")
-                for (i in 0 until data.length()){
-                    val bookJsonObject= data.getJSONObject(i)
-                    val bookObject= Book(
-                        bookJsonObject.getString("book_id"),
-                        bookJsonObject.getString("name"),
-                        bookJsonObject.getString("author"),
-                        bookJsonObject.getString("rating"),
-                        bookJsonObject.getString("price"),
-                        bookJsonObject.getString("image")
-                    )
-                    bookInfoList.add(bookObject)
-                    recyclerAdapter= DashboardRecyclerAdapter(activity as Context,bookInfoList)
+            val jsonObjectRequest =
+                object : JsonObjectRequest(Request.Method.GET, url, null, Response.Listener {
+
+                    // here we will handle the response
+                    val success = it.getBoolean("success")
+                    if (success) {
+                        val data = it.getJSONArray("data")
+                        for (i in 0 until data.length()) {
+                            val bookJsonObject = data.getJSONObject(i)
+                            val bookObject = Book(
+                                bookJsonObject.getString("book_id"),
+                                bookJsonObject.getString("name"),
+                                bookJsonObject.getString("author"),
+                                bookJsonObject.getString("rating"),
+                                bookJsonObject.getString("price"),
+                                bookJsonObject.getString("image")
+                            )
+                            bookInfoList.add(bookObject)
+                            recyclerAdapter =
+                                DashboardRecyclerAdapter(activity as Context, bookInfoList)
 
 
-                    recyclerDashboard.adapter=recyclerAdapter
+                            recyclerDashboard.adapter = recyclerAdapter
 
-                    recyclerDashboard.layoutManager=layoutManager
+                            recyclerDashboard.layoutManager = layoutManager
 
-                    recyclerDashboard.addItemDecoration(
-                        DividerItemDecoration(
-                            recyclerDashboard.context,
-                            (layoutManager as LinearLayoutManager).orientation)
-                    )
+                            recyclerDashboard.addItemDecoration(
+                                DividerItemDecoration(
+                                    recyclerDashboard.context,
+                                    (layoutManager as LinearLayoutManager).orientation
+                                )
+                            )
+                        }
+                    } else {
+                        Toast.makeText(
+                            activity as Context,
+                            "Some Error Occurred!!!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                }, Response.ErrorListener {
+
+                    // here we will handle the errors
+                    println("Error is $it")
+
+
+                }) {
+                    override fun getHeaders(): MutableMap<String, String> {
+                        val headers = HashMap<String, String>()
+                        headers["Content-type"] = "application/json"
+                        headers["token"] = "ca2ceff0d7e496"
+                        return headers
+                    }
                 }
-            }else{
-                Toast.makeText(activity as Context, "Some Error Occurred!!!", Toast.LENGTH_SHORT).show()
+
+            queue.add(jsonObjectRequest)
+        }else{
+            val dialog =  AlertDialog.Builder(activity as Context)
+            dialog.setTitle("Error")
+            dialog.setMessage("Internet Connection not Found")
+            dialog.setPositiveButton("Open Settings"){text , listner->
+                val  settingIntent= Intent(Settings.ACTION_WIRELESS_SETTINGS)
+                startActivity(settingIntent)
+                activity?.finish()
             }
-
-        },Response.ErrorListener {
-
-            // here we will handle the errors
-            println("Error is $it")
-
-
-        }){
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String,String>()
-                headers["Content-type"]="application/json"
-                headers["token"]="ca2ceff0d7e496"
-                return headers
+            dialog.setNegativeButton("Exit"){text,listner->
+                ActivityCompat.finishAffinity(activity as Activity)
             }
+            dialog.create()
+            dialog.show()
         }
 
-        queue.add(jsonObjectRequest)
 
         return view
     }
