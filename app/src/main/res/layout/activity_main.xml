@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        android:background="@color/design_default_color_primary"
+        android:background="@color/colorPrimary"
          android:theme="@style/ThemeOverlay.AppCompat.Dark"
 
          app:layout_scrollFlags="scroll|enterAlways"/>
@@ -52,7 +52,7 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:menu="@menu/menu_drawer"
-        app:itemTextAppearance="@style/NewFontStyle"/>
+     />
 
 
 </androidx.drawerlayout.widget.DrawerLayout>
