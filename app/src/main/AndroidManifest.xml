@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.arsalan.bookhub">
-    
-    <uses-permission android:name="android.permission.INTERNET"/><!--  allows app to fetch , ,connect,send data permission -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/><!--   checks if the app is connected to the internet or not .is ... is used to acces s the connectivity status of the device-->
 
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- allows app to fetch , ,connect,send data permission -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/Theme.BookHub">
+        <activity
+            android:name=".DescriptionActivity"
+            android:exported="false" />
         <activity
             android:name=".activity.MainActivity"
             android:exported="true">
