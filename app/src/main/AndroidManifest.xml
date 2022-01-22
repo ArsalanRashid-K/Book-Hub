@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BookHub">
         <activity
-            android:name=".DescriptionActivity"
+            android:name=".activity.DescriptionActivity"
             android:exported="false" />
         <activity
             android:name=".activity.MainActivity"

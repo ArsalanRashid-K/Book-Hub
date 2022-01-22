@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DescriptionActivity"
+    tools:context=".activity.DescriptionActivity"
     android:background="@color/white">
 
     <androidx.appcompat.widget.Toolbar
@@ -16,7 +16,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
 
 
-    <ScrollView
+     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
@@ -103,26 +103,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
+                    android:layout_marginTop="4dp"
                     android:padding="6dp"
                     android:text="About the book"
-                    android:textStyle="bold"
                     android:textSize="16sp"
-                   android:layout_marginTop="4dp"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/txtBookDesc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="6dp"
                     android:layout_below="@+id/txtAboutTheBookStatic"
-                    android:textSize="18sp"
+                    android:layout_margin="10dp"
+                    android:padding="6dp"
                     android:text="hjaslpjwopiejhapo"
                     android:textColor="@color/black"
-                    android:layout_margin="10dp"/>
+                    android:textSize="18sp" />
             </RelativeLayout>
 
         </RelativeLayout>
+
+
     </ScrollView>
+
     <Button
         android:id="@+id/btnAddToFav"
         android:layout_width="match_parent"
@@ -139,8 +142,15 @@
         android:layout_height="match_parent"
         android:background="@color/white">
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
     </RelativeLayout>
 </RelativeLayout>
+
 
 
 
