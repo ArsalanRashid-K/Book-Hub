@@ -1,16 +1,25 @@
 package com.arsalan.bookhub.activity
 
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.media.Rating
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.textclassifier.ConversationActions
 import android.widget.*
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.arsalan.bookhub.R
+import com.arsalan.bookhub.util.ConnectionManager
+import com.squareup.picasso.Picasso
 import org.json.JSONObject
 
 class DescriptionActivity : AppCompatActivity() {
@@ -24,6 +33,8 @@ class DescriptionActivity : AppCompatActivity() {
     lateinit var btnAddToFav: Button
     lateinit var progressBar:ProgressBar
     lateinit var progressLayout: RelativeLayout
+
+    lateinit var toolbar: Toolbar
 
     var bookId:String? = "100"
 
@@ -43,7 +54,13 @@ class DescriptionActivity : AppCompatActivity() {
         progressLayout=findViewById(R.id.progressLayout)
         progressLayout.visibility=View.VISIBLE
 
-        if (intent != null){
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.title = "Book Details"
+
+
+
+            if (intent != null){
             bookId=intent.getStringExtra("book_id")
         }else{
             finish()
@@ -58,18 +75,56 @@ class DescriptionActivity : AppCompatActivity() {
 
         val jsonParams = JSONObject()
         jsonParams.put("book_id",bookId)
-        val jsonRequest=
-            object : JsonObjectRequest(
-                Request.Method.POST, url, jsonParams, Response.Listener{},
-            Response.ErrorListener {
 
-            }){
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String,String>()
-                headers["Content-type"] = "application/json"
-                headers["token"]="ca2ceff0d7e496"
-                return headers
+        if(ConnectionManager().checkConnectivity(this@DescriptionActivity)){
+
+            val jsonRequest=
+                object : JsonObjectRequest(
+                    Request.Method.POST, url, jsonParams, Response.Listener{try {
+                        val success =it.getBoolean("success")
+                        if(success){
+                            val  bookJsonObjects= it.getJSONObject("book_data")
+                            progressLayout.visibility=View.GONE
+                            Picasso.get().load(bookJsonObjects.getString("image")).error(R.drawable.default_book_cover).into(imgBookImage)
+
+                            txtBookName.text=bookJsonObjects.getString("name")
+                            txtBookAuthor.text=bookJsonObjects.getString("author")
+                            txtBookPrice.text=bookJsonObjects.getString("price")
+                            txtBookRating.text=bookJsonObjects.getString("rating")
+                            txtBookDesc.text = bookJsonObjects.getString("description")
+
+                        }else{
+                            Toast.makeText(this@DescriptionActivity, "some  Error occurred", Toast.LENGTH_SHORT).show()
+                        }
+                    }catch (e:Exception){
+                        Toast.makeText(this@DescriptionActivity, "some  error occurred", Toast.LENGTH_SHORT).show()
+                    }
+                    },
+                    Response.ErrorListener {
+                        Toast.makeText(this@DescriptionActivity, "Volley Error $it ", Toast.LENGTH_SHORT).show()
+                    }){
+                    override fun getHeaders(): MutableMap<String, String> {
+                        val headers = HashMap<String,String>()
+                        headers["Content-type"] = "application/json"
+                        headers["token"]="ca2ceff0d7e496"
+                        return headers
+                    }
+                }
+            queue.add(jsonRequest)
+        }else{
+            val dialog =  AlertDialog.Builder(this@DescriptionActivity)
+            dialog.setTitle("Error")
+            dialog.setMessage("Internet Connection not Found")
+            dialog.setPositiveButton("Open Settings"){text , listner->
+                val  settingIntent= Intent(Settings.ACTION_WIRELESS_SETTINGS)
+                startActivity(settingIntent)
+                finish()
             }
+            dialog.setNegativeButton("Exit"){text,listner->
+                ActivityCompat.finishAffinity(this@DescriptionActivity)
+            }
+            dialog.create()
+            dialog.show()
         }
     }
 }

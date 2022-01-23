@@ -81,7 +81,9 @@ class DashboardRecyclerAdapter(val context: Context, val itemList: ArrayList<Boo
         holder.txBookPrice.text = book.bookPrice
         holder.txtBookRating.text = book.bookRating
         //holder.imgBookImage.setImageResource(book.bookImage)
-        Picasso.get().load(book.bookImage).centerCrop().error(R.drawable.default_book_cover).into(holder.imgBookImage)
+//        Picasso.get().load(book.bookImage).centerCrop().error(R.drawable.default_book_cover).into(holder.imgBookImage)
+        Picasso.get().load(book.bookImage).error(R.drawable.default_book_cover).into(holder.imgBookImage)
+
 
         holder.llContent.setOnClickListener {
             val intent = Intent(context, DescriptionActivity::class.java)
