@@ -10,11 +10,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.arsalan.bookhub.fragment.DashboardFragment
-import com.arsalan.bookhub.fragment.FavouritesFragement
-import com.arsalan.bookhub.fragment.ProfileFragment
 import com.arsalan.bookhub.R
-import com.arsalan.bookhub.fragment.AboutAppFragment
+import com.arsalan.bookhub.fragment.*
 import com.google.android.material.navigation.NavigationView
 import java.util.*
 
@@ -70,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.favourites ->{
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.frame, FavouritesFragement())
+                        .replace(R.id.frame, FavouritesFragment())
 //                        .addToBackStack("Favourite")
                         .commit()
                     supportActionBar?.title="Favourite"
