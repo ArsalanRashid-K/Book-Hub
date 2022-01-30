@@ -5,19 +5,25 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.media.Rating
+import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Display
 import android.view.View
 import android.view.textclassifier.ConversationActions
 import android.widget.*
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.room.Room
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.arsalan.bookhub.R
+import com.arsalan.bookhub.database.BookDataBase
+import com.arsalan.bookhub.database.BookEntity
 import com.arsalan.bookhub.util.ConnectionManager
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
@@ -85,6 +91,9 @@ class DescriptionActivity : AppCompatActivity() {
                         if(success){
                             val  bookJsonObjects= it.getJSONObject("book_data")
                             progressLayout.visibility=View.GONE
+
+                            val bookImageUrl= bookJsonObjects.getString("image")
+
                             Picasso.get().load(bookJsonObjects.getString("image")).error(R.drawable.default_book_cover).into(imgBookImage)
 
                             txtBookName.text=bookJsonObjects.getString("name")
@@ -92,6 +101,31 @@ class DescriptionActivity : AppCompatActivity() {
                             txtBookPrice.text=bookJsonObjects.getString("price")
                             txtBookRating.text=bookJsonObjects.getString("rating")
                             txtBookDesc.text = bookJsonObjects.getString("description")
+                            val  bookEntity = BookEntity(
+                                bookId?.toInt() as Int,
+                                txtBookName.text.toString(),
+                                txtBookAuthor.text.toString(),
+                                txtBookPrice.text.toString(),
+                                txtBookRating.text.toString(),
+                                txtBookDesc.text.toString(),
+                                bookImageUrl
+                            )
+                            val  checkFav=DBAsyncTask(applicationContext,bookEntity,1).execute()
+                            val isFav = checkFav.get()
+
+                            if(isFav){
+                                btnAddToFav.text="Remove from Favourites"
+                                val favColor= ContextCompat.getColor(applicationContext,R.color.colorFavourite)
+                                btnAddToFav.setBackgroundColor(favColor)
+                            }else{
+                                btnAddToFav.text="Add to Favourites"
+                                val favColor= ContextCompat.getColor(applicationContext,R.color.colorFavourite)
+                                btnAddToFav.setBackgroundColor(favColor)
+
+                            }
+
+
+
 
                         }else{
                             Toast.makeText(this@DescriptionActivity, "some  Error occurred", Toast.LENGTH_SHORT).show()
@@ -127,4 +161,41 @@ class DescriptionActivity : AppCompatActivity() {
             dialog.show()
         }
     }
+
+    class DBAsyncTask (val  context: Context,val bookEntity: BookEntity, val mode:Int):AsyncTask<Void,Void,Boolean>(){
+
+        /*
+        Mode 1->  Check DB if the book is favourite or not
+        Mode 2-> Save the book into DB as favourite
+        Mode 3-> Remove the favourite book
+         */
+            val db = Room.databaseBuilder(context,BookDataBase::class.java,"books-db").build()
+        override fun doInBackground(vararg p0: Void?): Boolean {
+
+            when(mode){
+                1->{
+//                    Check DB if the book is favourite or not
+                    val book:BookEntity?=db.bookDao().getBookById(bookEntity.book_id.toString())
+                    db.close()
+                    return book!=null
+                }
+                2->{
+//                    Save the book into DB as favourite
+                    db.bookDao().insertBook(bookEntity)
+                    db.close()
+                    return true
+                }
+                3->{
+//                    Remove the favourite book
+                    db.bookDao().deleteBook((bookEntity))
+                    db.close()
+                    return true
+                }
+
+            }
+
+            return false
+        }
+    }
+
 }
